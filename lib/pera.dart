@@ -138,10 +138,9 @@ class Pera {
       for (List<TransactionInput> init in initibuses) {
          initibus.addAll(init);
       }
-      for(int i = 0; i < txs.length; i++) {
-        Transaction tx = txs[i];
+      for(Transaction tx in txs.where((tx) => tx.interioreTransaction.outputs.any((e) => e.publicKey == publicKey))) {
         for (int t = 0; t < tx.interioreTransaction.outputs.length; t++) {
-           outputs.add(Tuple3<int, String, TransactionOutput>(t, tx.interioreTransaction.id, tx.interioreTransaction.outputs[t]));
+            outputs.add(Tuple3<int, String, TransactionOutput>(t, tx.interioreTransaction.id, tx.interioreTransaction.outputs[t]));
         }
       }
       outputs.removeWhere((output) => initibus.any((init) => init.transactionId == output.item2));
