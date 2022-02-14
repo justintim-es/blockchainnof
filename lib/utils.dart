@@ -17,7 +17,8 @@ class Utils {
 
   static Future<Obstructionum> priorObstructionum(directory) async =>
       Obstructionum.fromJson(json.decode(await Utils.fileAmnis(File(directory.path + '/caudices_' + (directory.listSync().length -1).toString() + '.txt')).last));
-  static String signum(PrivateKey privateKey, TransactionOutput txOutput) => signature(privateKey, utf8.encode(json.encode(txOutput.toJson()))).toASN1Hex();
+  static String signum(PrivateKey privateKey, dynamic output) => signature(privateKey, utf8.encode(json.encode(output.toJson()))).toASN1Hex();
+
 
   static bool cognoscere(PublicKey publicaClavis, Signature signature, TransactionOutput txOutput) =>
       verify(publicaClavis, utf8.encode(json.encode(txOutput.toJson())), signature);

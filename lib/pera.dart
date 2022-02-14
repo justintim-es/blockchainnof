@@ -46,30 +46,25 @@ class Pera {
             obss.add(obs);
             if (obs.interioreObstructionum.gladiator.id == gladiatorId) {
                ours = await defensiones(gladiatorId, directory);
-               for (String key in ours.keys) {
-                  print(ours[key]);
-               }
             } else {
                others.add(await defensiones(obs.interioreObstructionum.gladiator.id, directory));
             }
          }
       }
-      bool isGreaterThan = false;
-      for (String key in ours.keys) {
-         BigInt highest = BigInt.zero;
-         for (Map<String, BigInt> other in others) {
-            if ((ours[key] ??= BigInt.zero) > (other[key] ??= BigInt.zero) && (ours[key] ??= BigInt.zero)  >= highest) {
-               isGreaterThan = true;
-            } else {
-               highest += other[key] ??= BigInt.zero;
-               isGreaterThan = false;
+      Map<String, bool> payedMore = Map();
+      for(String key in ours.keys) {
+        if(others.any((o) => o.keys.contains(key))) {
+          for(Map<String, BigInt> other in others.where((e) => e.keys.contains(key))) {
+            if((ours[key] ??= BigInt.zero) > (other[key] ??= BigInt.zero)) {
+              payedMore[key] = true;
             }
-         }
-         if(isGreaterThan) {
-            print(key);
-            Obstructionum oschob = obss.singleWhere((element) => element.probationem == key);
-            def.add(oschob.interioreObstructionum.defensio);
-         }
+          }
+        } else {
+          payedMore[key] = true;
+        }
+      }
+      for(String key in payedMore.keys) {
+        def.add(obss.singleWhere((obs) => obs.probationem == key).interioreObstructionum.defensio);
       }
       return def;
    }
@@ -109,12 +104,9 @@ class Pera {
          for(Transaction tx in txsWithOutput) {
             for (TransactionInput ischin in tx.interioreTransaction.inputs) {
                if (Utils.cognoscere(PublicKey.fromHex(Pera.curve(), oschout.publicKey), Signature.fromASN1Hex(ischin.signature), oschout)) {
-                  TransactionOutput oschoutoschout = tx.interioreTransaction.outputs.singleWhere((element) => probationums.contains(element.publicKey));
-                  BigInt prevValue = maschap[oschoutoschout.publicKey] ?? BigInt.zero;
-                  maschap[oschoutoschout.publicKey] = prevValue + oschoutoschout.nof;
-                  print('iaskjashfjasfhkassfjkafsjkasjf');
-                  for (String key in maschap.keys) {
-                     print(maschap[key]);
+                  for (TransactionOutput oschoutoschout in tx.interioreTransaction.outputs.where((element) => probationums.contains(element.publicKey))) {
+                    BigInt prevValue = maschap[oschoutoschout.publicKey] ?? BigInt.zero;
+                    maschap[oschoutoschout.publicKey] = prevValue + oschoutoschout.nof;
                   }
                }
             }
@@ -145,6 +137,14 @@ class Pera {
       }
       outputs.removeWhere((output) => initibus.any((init) => init.transactionId == output.item2));
       return outputs;
+   }
+   static Future<BigInt> statera(bool liber, String publicKey, Directory directory) async {
+     List<Tuple3<int, String, TransactionOutput>> outputs = await inconsumptusOutputs(liber, publicKey, directory);
+     BigInt balance = BigInt.zero;
+     for (Tuple3<int, String, TransactionOutput> inOut in outputs) {
+        balance += inOut.item3.nof;
+     }
+     return balance;
    }
    static Future<InterioreTransaction> novamRem(bool liber, int zeros, String ex, BigInt value, String to, List<Transaction> txStagnum, Directory directory) async {
       PrivateKey privatusClavis = PrivateKey.fromHex(Pera.curve(), ex);

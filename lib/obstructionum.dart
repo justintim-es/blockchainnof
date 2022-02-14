@@ -10,6 +10,7 @@ import 'package:hex/hex.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'package:nofifty/pera.dart';
 enum Generare {
   INCIPIO,
   EFECTUS,
@@ -85,6 +86,24 @@ class InterioreObstructionum {
       nonce = BigInt.zero,
       defensio = Utils.randomHex(1);
 
+
+  InterioreObstructionum.confussus({
+    required this.obstructionumDifficultas,
+    required this.propterDifficultas,
+    required this.transactionDifficultas,
+    required this.summaObstructionumDifficultas,
+    required this.obstructionumNumerus,
+    required this.producentis,
+    required this.priorProbationem,
+    required this.gladiator,
+    required this.liberTransactions,
+    required this.fixumTransactions
+  }):
+      generare = Generare.CONFUSSUS,
+      indicatione = DateTime.now().microsecondsSinceEpoch,
+      nonce = BigInt.zero,
+      defensio = Utils.randomHex(1);
+
   mine() {
     indicatione = DateTime.now().microsecondsSinceEpoch;
     nonce += BigInt.one;
@@ -138,6 +157,18 @@ class Obstructionum {
       interioreObstructionum.mine();
       probationem = HEX.encode(sha512.convert(utf8.encode(json.encode(interioreObstructionum.toJson()))).bytes);
     } while (!probationem.startsWith('0' * interioreObstructionum.obstructionumDifficultas));
+    mitte.send(Obstructionum(interioreObstructionum, probationem));
+  }
+  static Future confussus(List<dynamic> args) async {
+    InterioreObstructionum interioreObstructionum = args[0];
+    String toCrack = args[1];
+    SendPort mitte = args[2];
+    String probationem = '';
+    do {
+      interioreObstructionum.mine();
+      probationem = HEX.encode(sha512.convert(utf8.encode(json.encode(interioreObstructionum.toJson()))).bytes);
+      print(probationem);
+    } while (!probationem.startsWith('0' * interioreObstructionum.obstructionumDifficultas) && !probationem.contains(toCrack));
     mitte.send(Obstructionum(interioreObstructionum, probationem));
   }
   Map<String ,dynamic> toJson() => {
@@ -201,6 +232,19 @@ class Obstructionum {
         obstructionum.interioreObstructionum.obstructionumNumerus.add(0);
     }
     return obstructionum.interioreObstructionum.obstructionumNumerus;
+  }
+  static Future<List<Obstructionum>> getBlocks(Directory directory) async {
+    List<Obstructionum> obs = [];
+    for (int i = 0; i < directory.listSync().length; i++) {
+       await for(String line in Utils.fileAmnis(File(directory.path + Constantes.FileNomen + i.toString() + '.txt'))) {
+          obs.add(Obstructionum.fromJson(json.decode(line)));
+       }
+    }
+    return obs;
+  }
+  static Future<Gladiator> grabGladiator(String gladiatorId, Directory dir) async {
+    List<Obstructionum> obs = await getBlocks(dir);
+    return obs.singleWhere((ob) => ob.interioreObstructionum.gladiator.id == gladiatorId).interioreObstructionum.gladiator;
   }
 
 }

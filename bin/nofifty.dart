@@ -13,6 +13,8 @@ import 'package:nofifty/exampla.dart';
 import 'package:nofifty/constantes.dart';
 import 'package:nofifty/pera.dart';
 import 'package:test/expect.dart';
+import 'package:ecdsa/ecdsa.dart';
+import 'package:elliptic/elliptic.dart';
 void main(List<String> arguments) async {
     var parser = ArgParser();
     parser.addOption('publica-clavis');
@@ -124,9 +126,56 @@ void main(List<String> arguments) async {
         acciperePortus.listen((nuntius) async {
             Obstructionum obstructionum = nuntius;
             await obstructionum.salvare(principalisDirectory);
-
         });
         return Response.ok("");
     });
+    app.post('/mine-confussus/<gladiatorId>/<privateKey>', (Request request, String gladiatorId, String privateKey) async {
+      Obstructionum priorObstructionum = await Utils.priorObstructionum(principalisDirectory);
+      Gladiator gladiatorToAttack = await Obstructionum.grabGladiator(gladiatorId, principalisDirectory);
+      List<Transaction> txs = [];
+      for (String acc in gladiatorToAttack.output!.rationem.map((e) => e.interioreRationem.publicaClavis)) {
+        txs.add(Transaction.burn(await Pera.novamRem(true, 0, privateKey, await Pera.statera(true, acc, principalisDirectory), priorObstructionum.probationem, libreTxs, principalisDirectory)));
+      }
+      String toCrack = gladiatorToAttack.output!.defensio;
+      for (String def in await Pera.maximeDefensiones(gladiatorToAttack.id, principalisDirectory)) {
+        toCrack += def;
+      }
+      libreTxs.addAll(txs);
+      InterioreObstructionum interiore = InterioreObstructionum.confussus(
+        propterDifficultas:
+        (priorObstructionum.interioreObstructionum.gladiator.output?.rationem.length ?? 0) < Constantes.PerRationesObstructionum ?
+            (priorObstructionum.interioreObstructionum.propterDifficultas) - 1 :
+            priorObstructionum.interioreObstructionum.propterDifficultas + 1,
+        transactionDifficultas:
+        (priorObstructionum.interioreObstructionum.liberTransactions.length ?? 0)  < Constantes.TxCaudice ?
+            priorObstructionum.interioreObstructionum.transactionDifficultas - 1 :
+            priorObstructionum.interioreObstructionum.transactionDifficultas + 1,
+        obstructionumDifficultas: await Obstructionum.utDifficultas(principalisDirectory),
+        summaObstructionumDifficultas: await Obstructionum.utSummaDifficultas(principalisDirectory),
+        obstructionumNumerus: await Obstructionum.utObstructionumNumerus(principalisDirectory),
+        producentis: publicaClavis,
+        priorProbationem: priorObstructionum.probationem,
+        gladiator: Gladiator(GladiatorInput(Utils.signum(PrivateKey.fromHex(Pera.curve(), privateKey), gladiatorToAttack), gladiatorId), null, Utils.randomHex(32)),
+        liberTransactions: libreTxs,
+        fixumTransactions: []
+      );
+      if(interiore.transactionDifficultas.isNegative) interiore.transactionDifficultas = 0;
+      if(interiore.propterDifficultas.isNegative) interiore.propterDifficultas = 0;
+      GladiatorOutput go = interiore.gladiator.output ?? GladiatorOutput([]);
+      rationem.removeWhere((element) => element.interioreRationem.zeros < priorObstructionum.interioreObstructionum.propterDifficultas ||
+              go.rationem.contains(element));
+      libreTxs.removeWhere(
+              (element) => element.interioreTransaction.zeros < priorObstructionum.interioreObstructionum.transactionDifficultas ||
+              interiore.liberTransactions.contains(element)
+      );
+      ReceivePort acciperePortus = ReceivePort();
+      await Isolate.spawn(Obstructionum.confussus, List<dynamic>.from([interiore, toCrack, acciperePortus.sendPort]));
+      acciperePortus.listen((nuntius) async {
+          Obstructionum obstructionum = nuntius;
+          await obstructionum.salvare(principalisDirectory);
+      });
+      return Response.ok("");
+    });
+
     var server = await io.serve(app, internum_ip, int.parse(rpc_portus));
 }

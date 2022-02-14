@@ -87,6 +87,9 @@ class Transaction {
     } while(!probationem.startsWith('0' * interiore.zeros));
     mitte.send(Transaction(probationem, interiore));
   }
+  Transaction.burn(this.interioreTransaction): probationem = HEX.encode(sha256.convert(utf8.encode(json.encode(interioreTransaction.toJson()))).bytes);
+    
+
   Map<String, dynamic> toJson() => {
     'probationem': probationem,
     'interioreTransaction': interioreTransaction.toJson()
